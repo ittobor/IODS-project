@@ -8,4 +8,4 @@ The course learning objectives are:
 * to know how to learn more about the above open software tools
 * to know how to apply certain methods of data science (data driven statistics)  
 
-[Link](https://github.com/ittobor/IODS-project) to my GitHub repository for this course.
+[Link](https://ittobor.github.io/IODS-project/) to my IODS course diary.
