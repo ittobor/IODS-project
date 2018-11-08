@@ -1,4 +1,4 @@
-## About the course: Introduction to Open Data Science
+## Week1 - About the course: Introduction to Open Data Science
 
 The course learning objectives are:  
 
