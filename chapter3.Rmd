@@ -1,0 +1,25 @@
+# Week3 - Logistic Regression
+
+I prepared myself for this weeks topic by completing DataCamp exercise on "Logistic Regression".
+
+## Data Wrangling
+As I did last week, for the data wrangling part of this weeks exercises I mostly used the methods learned from the DataCamp exercise. I learned about joining datasets and doing data mutations.
+
+My source code used in the wrangling is [here](https://github.com/ittobor/IODS-project/blob/master/data/create_alc.R).  
+
+Basically, here are the main points what is done in the code:
+
+* Initial dataset is acquired and extracted manually from given web source.
+* Two data sets are read in and combined as one, since they contain answers from same students, by joining them based on variables: `school`,`sex`,`age`,`address`,`famsize`,`Pstatus`,`Medu`,`Fedu`,`Mjob`,`Fjob`,`reason`,`nursery`,`internet`
+* The columns not used in join are combined by taking rounded avarage of numerical values and by selecting the first value of not numeric values
+* `alc_use` and `high_use` variables are generated from the answers on alcohol use
+
+The dataset (`alc.csv`) that the code created can be found from [here](https://github.com/ittobor/IODS-project/blob/master/data/alc.csv).
+
+## Data Analysis
+```{r echo=FALSE}
+library(ggplot2)
+library(GGally)
+#learning2014 <- read.table("/Users/ittobor/Projects/iods/IODS-project/data/learning2014.txt", sep="\t", header=TRUE)
+alc <- read.table("C:/Users/ittobor/projects/iods/IODS-project/data/alc.csv", sep=";", header=TRUE)
+```
