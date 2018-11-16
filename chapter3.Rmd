@@ -53,6 +53,10 @@ My hypothesis to study is how time consumption is related with alcohol consumpti
 * `goout` - Going out with friends. My intuition here is this would be a factor to increase alcohol consumption.
 
 ### Step 4 - Numerical and graphical exploration on chosen variables
+
+Here I use `ggpairs`, from last week, to visualize the chosen variables together with the variable `high_use`. From the diagram we get quickly a good overview of the relations of the variables between themselves and with the variable `high_use`. By looking at the correlation coefficients we can observe that there is not much correlation between the chosen variables. We could say that `freetime` and `goout` mildly correlate positively, meaning that you would go out with friends during your freetime which makes common sense. Also that `traveltime` and `studytime` mildly correlate negatively, the same with `freetime` and `studytime`, meaning that travel time between school and home, also freetime, is not used for studying. My interpretation is that the low correlation between the chosen variables could tell that variables are not interfering with each other and be independently a factor to increase or decrease alcohol consumption. And that can be seen in favor of my hypothesis.
+
+From the density plots we can see that there are some deviations for each of the chosen variable when comparing to high/low alcohol usage. Most distinctive difference is between `goout` and `high_use` where we could say that those who go out more have the tendency to high alcohol consumption. When comparing `freetime` and `high_use` density one could argue that when you have less free time there is less observations of high alcohol consumptions which are growing when you have more free time. Similar argument can be made when comparing `studytime` and `high_use`, where there are less high alcohol consumption when more time spent on studies. And also when comparing `traveltime` and `high_use` one could say that if you live close to school you have more time to consume alcohol. In my interpretation these are still supporting my hypothesis, but it is not so clear because the densities between low/high alcohol consumption per chosen variable are very similar: there are 1/3 high consuming versus 2/3 low consuming observations, and the values of the attiributes are dicrete and few.
 ```{r echo=FALSE}
 alc_min <- data.frame(matrix(ncol=0,nrow=382))
 alc_min$high_use <- alc$high_use
@@ -60,7 +64,37 @@ alc_min$traveltime <- alc$traveltime
 alc_min$studytime <- alc$studytime
 alc_min$goout <- alc$goout
 alc_min$freetime <- alc$freetime
+
 ggpairs(alc_min, 
-        mapping = aes(col = high_use, alpha = 0.3), 
-        lower = list(combo = wrap("facethist", bins = 20)))
+        mapping = aes(col = high_use, alpha = 0.3, fill=high_use), 
+        lower = list(combo = wrap("facethist", bins = 20))) + ggtitle("Student traveltime, studytime,\nfreetime and goout relations by alcohol consumption")
 ```
+```{r echo=FALSE, fig.show='hold', out.width='50%'}
+hu_traveltime_box <- ggplot(alc_min, aes(x = high_use, y = traveltime, col = high_use))
+hu_traveltime_box + geom_boxplot() + ylab("traveltime") + ggtitle("Student traveltime by alcohol consumption BOX")
+
+hu_traveltime_his <- ggplot(alc_min, aes(x=traveltime, fill=high_use))
+hu_traveltime_his + geom_bar() + coord_flip() + ggtitle("Student traveltime by alcohol consumption BAR")
+```
+```{r echo=FALSE, fig.show='hold', out.width='50%'}
+hu_traveltime_box <- ggplot(alc_min, aes(x = high_use, y = studytime, col = high_use))
+hu_traveltime_box + geom_boxplot() + ylab("studytime") + ggtitle("Student studytime by alcohol consumption BOX")
+
+hu_traveltime_his <- ggplot(alc_min, aes(x=studytime, fill=high_use))
+hu_traveltime_his + geom_bar() + coord_flip() + ggtitle("Student studytime by alcohol consumption BAR")
+```
+```{r echo=FALSE, fig.show='hold', out.width='50%'}
+hu_traveltime_box <- ggplot(alc_min, aes(x = high_use, y = goout, col = high_use))
+hu_traveltime_box + geom_boxplot() + ylab("goout") + ggtitle("Student go out by alcohol consumption BOX")
+
+hu_traveltime_his <- ggplot(alc_min, aes(x=goout, fill=high_use))
+hu_traveltime_his + geom_bar() + coord_flip() + ggtitle("Student go out by alcohol consumption BAR")
+```
+```{r echo=FALSE, fig.show='hold', out.width='50%'}
+hu_traveltime_box <- ggplot(alc_min, aes(x = high_use, y = freetime, col = high_use))
+hu_traveltime_box + geom_boxplot() + ylab("freetime") + ggtitle("Student freetime by alcohol consumption BOX")
+
+hu_traveltime_his <- ggplot(alc_min, aes(x=freetime, fill=high_use))
+hu_traveltime_his + geom_bar() + coord_flip() + ggtitle("Student freetime by alcohol consumption BAR")
+```
+
