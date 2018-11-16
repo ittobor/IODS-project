@@ -42,3 +42,25 @@ Column (variable) types of the combined dataset:
 ```{r echo=TRUE}
 glimpse(alc)
 ```
+
+### Step 3 - Variables to study in relations with alcohol consumption
+
+My hypothesis to study is how time consumption is related with alcohol consumption. The idea being that if you spend your time with activities you would not have time to consume alcohol and vice versa. My choice of variables are in sense time consuming variables: `freetime`, `goout`, `studytime` and `traveltime`.  
+
+* `traveltime` - Home to school travel time. My intuition here is this would be a factor to decrease alcohol consumption.
+* `studytime` - Weekly study time. My intuition here is this would be a factor to decrease alcohol consumption.
+* `freetime` - Free time after school. My intuition here is this would be a factor to increase alcohol consumption.
+* `goout` - Going out with friends. My intuition here is this would be a factor to increase alcohol consumption.
+
+### Step 4 - Numerical and graphical exploration on chosen variables
+```{r echo=FALSE}
+alc_min <- data.frame(matrix(ncol=0,nrow=382))
+alc_min$high_use <- alc$high_use
+alc_min$traveltime <- alc$traveltime
+alc_min$studytime <- alc$studytime
+alc_min$goout <- alc$goout
+alc_min$freetime <- alc$freetime
+ggpairs(alc_min, 
+        mapping = aes(col = high_use, alpha = 0.3), 
+        lower = list(combo = wrap("facethist", bins = 20)))
+```
