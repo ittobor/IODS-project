@@ -12,14 +12,33 @@ Basically, here are the main points what is done in the code:
 * Initial dataset is acquired and extracted manually from given web source.
 * Two data sets are read in and combined as one, since they contain answers from same students, by joining them based on variables: `school`,`sex`,`age`,`address`,`famsize`,`Pstatus`,`Medu`,`Fedu`,`Mjob`,`Fjob`,`reason`,`nursery`,`internet`
 * The columns not used in join are combined by taking rounded avarage of numerical values and by selecting the first value of not numeric values
-* `alc_use` and `high_use` variables are generated from the answers on alcohol use
+* `alc_use` variable was generated to indicate alcohol use (avarage of daily and weekly consumption)
+* `high_use` variables was generated to indicate high use of alcohol (true is `alc_use` is > 2)
 
-The dataset (`alc.csv`) that the code created can be found from [here](https://github.com/ittobor/IODS-project/blob/master/data/alc.csv).
+The dataset (`alc.csv`) that the code created can be found from c
 
 ## Data Analysis
-```{r echo=FALSE}
+
+### Step 1 - New markdown file
+Step one was to create chapter3.Rmd to inject this content to the diary as a child of subscipts in index.Rmd.
+
+### Step 2 - Combined dataset and attributes 
+
+The combined dataset contains the data from two Portuguese schools and were originally gathered from school reports and questionnaires. The data was collected initally in two datasets, one regarding student performance in mathemathics and one regarding student performance in Portuguese language. In addition to section Data Wrangling, in which the join criteria and additionally created variables are discussed, you can find more information about the variables in [here](https://archive.ics.uci.edu/ml/datasets/Student+Performance).
+
+```{r echo=FALSE, message=FALSE}
 library(ggplot2)
 library(GGally)
-#learning2014 <- read.table("/Users/ittobor/Projects/iods/IODS-project/data/learning2014.txt", sep="\t", header=TRUE)
-alc <- read.table("C:/Users/ittobor/projects/iods/IODS-project/data/alc.csv", sep=";", header=TRUE)
+library(dplyr)
+library(tidyr)
+alc <- read.table("https://raw.githubusercontent.com/ittobor/IODS-project/master/data/alc.csv", sep=";", header=TRUE)
+```
+Dimensions and the column (variable) names of the combined dataset:
+```{r echo=TRUE}
+dim(alc)
+colnames(alc)
+```
+Column (variable) types of the combined dataset:
+```{r echo=TRUE}
+glimpse(alc)
 ```

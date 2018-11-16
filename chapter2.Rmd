@@ -24,7 +24,7 @@ The dataset (`learning2014.txt`) that the code created can be found from [here](
 ```{r echo=FALSE}
 library(ggplot2)
 library(GGally)
-learning2014 <- read.table("/Users/ittobor/Projects/iods/IODS-project/data/learning2014.txt", sep="\t", header=TRUE)
+learning2014 <- read.table("https://raw.githubusercontent.com/ittobor/IODS-project/master/data/learning2014.txt", sep="\t", header=TRUE)
 ```
 
 With `dim` function we learn the dimension of the input dataset. That is the function returns the number of columns and rows.
