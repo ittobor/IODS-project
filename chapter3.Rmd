@@ -15,7 +15,7 @@ Basically, here are the main points what is done in the code:
 * `alc_use` variable was generated to indicate alcohol use (avarage of daily and weekly consumption)
 * `high_use` variables was generated to indicate high use of alcohol (true is `alc_use` > 2)
 
-The dataset (`alc.csv`) that the code created can be found from c
+The dataset (`alc.csv`) that the code created can be found from [here](https://github.com/ittobor/IODS-project/blob/master/data/alc.csv).
 
 ## Data Analysis
 
@@ -80,27 +80,131 @@ hu_traveltime_box + geom_boxplot() + ylab("traveltime") + ggtitle("Student trave
 hu_traveltime_his <- ggplot(alc_min, aes(x=traveltime, fill=high_use))
 hu_traveltime_his + geom_bar() + coord_flip() + ggtitle("Student traveltime by alcohol consumption BAR")
 
-hu_traveltime_box <- ggplot(alc_min, aes(x = high_use, y = freetime, col = high_use))
-hu_traveltime_box + geom_boxplot() + ylab("freetime") + ggtitle("Student freetime by alcohol consumption BOX")
+hu_freetime_box <- ggplot(alc_min, aes(x = high_use, y = freetime, col = high_use))
+hu_freetime_box + geom_boxplot() + ylab("freetime") + ggtitle("Student freetime by alcohol consumption BOX")
 
-hu_traveltime_his <- ggplot(alc_min, aes(x=freetime, fill=high_use))
-hu_traveltime_his + geom_bar() + coord_flip() + ggtitle("Student freetime by alcohol consumption BAR")
+hu_freetime_his <- ggplot(alc_min, aes(x=freetime, fill=high_use))
+hu_freetime_his + geom_bar() + coord_flip() + ggtitle("Student freetime by alcohol consumption BAR")
 ```
 
 With `studytime` and `goout` the distributions differ more in terms of high and low alcohol consumption. When looking at the high alcohol consumption with  `studytime` it seems that the high alcohol consumption increases more when studytime decreases compared to low alcohol consumption. Also high alcohol consumption increases more when go out time with friends increases compared to low alcohol consumption.
 
 ```{r echo=FALSE, fig.show='hold', out.width='25%'}
-hu_traveltime_box <- ggplot(alc_min, aes(x = high_use, y = studytime, col = high_use))
-hu_traveltime_box + geom_boxplot() + ylab("studytime") + ggtitle("Student studytime by alcohol consumption BOX")
+hu_studytime_box <- ggplot(alc_min, aes(x = high_use, y = studytime, col = high_use))
+hu_studytime_box + geom_boxplot() + ylab("studytime") + ggtitle("Student studytime by alcohol consumption BOX")
 
-hu_traveltime_his <- ggplot(alc_min, aes(x=studytime, fill=high_use))
-hu_traveltime_his + geom_bar() + coord_flip() + ggtitle("Student studytime by alcohol consumption BAR")
+hu_studytime_his <- ggplot(alc_min, aes(x=studytime, fill=high_use))
+hu_studytime_his + geom_bar() + coord_flip() + ggtitle("Student studytime by alcohol consumption BAR")
 
-hu_traveltime_box <- ggplot(alc_min, aes(x = high_use, y = goout, col = high_use))
-hu_traveltime_box + geom_boxplot() + ylab("goout") + ggtitle("Student go out by alcohol consumption BOX")
+hu_goout_box <- ggplot(alc_min, aes(x = high_use, y = goout, col = high_use))
+hu_goout_box + geom_boxplot() + ylab("goout") + ggtitle("Student go out by alcohol consumption BOX")
 
-hu_traveltime_his <- ggplot(alc_min, aes(x=goout, fill=high_use))
-hu_traveltime_his + geom_bar() + coord_flip() + ggtitle("Student go out by alcohol consumption BAR")
+hu_goout_his <- ggplot(alc_min, aes(x=goout, fill=high_use))
+hu_goout_his + geom_bar() + coord_flip() + ggtitle("Student go out by alcohol consumption BAR")
 ```
 
 ### Step 5 - Statistical exploration with logistic regression
+
+Here we use logistic regression to statistically explore the relationship between chosen variables and the binary high/low alcohol consumption.
+```{r echo=FALSE}
+model <- glm(high_use ~ studytime + goout + traveltime + freetime, data = alc, family = "binomial")
+summary(model)
+```
+
+From the summary we can see the distribution of deviance residuals for the individual cases used in the model. The table of coeffiecients shows the coefficients and its standard error for each variable. The coefficients tell the change in the log odds  of the outcome for a one unit increase in the predictor variable (e.g. one unit change in `goout` gives the log odds of `high_use` increase by 0.7206). From the p-values we can see that the probability of each variable NOT being relevant (so low score here is good). From the significance indicators we can tell that `studytime`, `goout` and `traveltime` are statistically significant, but `freetime` is not.
+
+From the below odd ratios of the coefficients we can say that each of the chosen variable is positively associated with high consumption of alcohol (when we have defined `high_use` as binary, TRUE / FALSE). From the odds ratios and confidence intervals we can say that since `studytime` is below 1 values (the odds ratio and the confidence interval) it is in favor of low alcohol consumption. Both `goout` and `traveltime` is above 1 so they both are in favor of high alcohol consumption. Where as `freetime` has interval that includes value 1, meaning that it is random to which side the variable is in favor of.
+
+```{r echo=FALSE, message=FALSE}
+OR <- coef(model) %>% exp
+CI <- confint(model) %>% exp
+cbind(OR, CI)
+```
+
+Based on summary and odds ratios I conclude that `studytime`, `goout` and `traveltime` support my hypothesis but surprisingly `freetime` does not. And since `freetime` is not statistically significant I will drop that variable from further parts of this exercise analysis.
+
+### Step 6 - Predicative power of the model
+
+First we need to re-fit the model by taking out the statistically not significant `freetime` variable.
+
+```{r echo=FALSE}
+model <- glm(high_use ~ studytime + goout + traveltime, data = alc, family = "binomial")
+summary(model)
+
+probabilities <- predict(model, type = "response")
+alc_min <- mutate(alc_min, probability = probabilities)
+alc_min <- mutate(alc_min, prediction = probability > 0.5)
+```
+
+Then we use the model to predict probabilities for the date that was used to train the model.
+Based on the probabilities we make predictions for the training data observations so that `probability > 0.5` is high alcohol consumption, otherwise low. In the first table below we can see the counts of the true values of `high_use` and of the predictions. And in the second table are the proportions of the same. From these we can compute that the model gets it (0.63874346 + 0.11780105 = 0.75654451) ~76% times correct, meaning the training error being ~24%. The model gets 91% of the true low alcohol consumption observations correct, but only ~39% of the true high alcohol consumption observations correct. 
+
+```{r echo=FALSE}
+taabla <- table(high_use = alc_min$high_use, prediction = alc_min$prediction)
+taabla %>% addmargins()
+taabla %>% prop.table() %>% addmargins()
+```
+
+As as performance comparison to a simple guessing strategy, with weights 2/3 to low alcohol consumption and 1/3 to high alcohol consumption, we can see that the model beats this guessing strategy. The results from the simple guessing strategy is below. Simple guessing strategy get ~59% correct from the true totals, ~70% of the true low alcohol consumption and ~32% of the true high alcohol consumption. (Note: Since guessing strategy is based on randomizer there might be slight changes on percentages written above and how many time this rmarkdown code is run after what I had written)
+
+```{r echo=FALSE}
+set.seed(1)
+sampula <- sample(c(0,1), size=382, replace=TRUE, prob=c(2/3,1/3))
+taabla2 <- table(high_use = alc_min$high_use, prediction = sampula)
+taabla2 %>% addmargins()
+taabla2 %>% prop.table() %>% addmargins()
+```
+
+Here is also graphical visualization of the actual and predicted values.
+
+```{r echo=FALSE}
+hu_prediction <- ggplot(alc_min, aes(x = probability, y = high_use, col = prediction))
+hu_prediction + geom_point() + ggtitle("Actual values of high_use vs perdictions by the model")
+```
+
+### Step 7 - 10-fold cross-validation BONUS
+
+For the 10-fold cross-validation we need to define a loss function. I use the same definition of loss function as was done in the Data Camp exercises. Here is the error-rate of the above trained model computed with the loss function.
+```{r echo=FALSE}
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+loss_func(class=alc_min$high_use, prob=alc_min$probability)
+```
+And here is the error-rate of the trained model wih 10-fold cross-validation. As you can see the model slightly outperforms the model used in Data Camp exercise.
+```{r echo=FALSE}
+# K-fold cross-validation
+library(boot)
+cv <- cv.glm(data = alc_min, cost = loss_func, glmfit = model, K = 10)
+
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+```
+
+### Step 8 - Cross-validation of performance of different logistic regression models SUPERBONUS
+
+In this part of the exercise set I used only variables that are of numeric type (type:int). There are 14 such variables.
+I use for loop to add a predictor in one-by-one fashion and do the cross-validation step to store the error in betweens.
+Unfortunately my plotting skills are poor and I was not able to flip the value-labels of x-axis (was able to flip the "curve" but decided not to since it would make it more confusing), hence the errors are represented in this plot in increasing number of predictors order. 
+
+```{r echo=FALSE}
+predictor <- c("age","Medu","Fedu","traveltime","studytime","failures","famrel","freetime","goout","health" ,"absences","G1","G2","G3")
+predictors_in = ""
+errs <- 1:length(predictor)
+x <- 1:length(predictor)
+for(i in 1:length(predictor)) {
+  if (i == 1) {
+    predictors_in = predictor[i]
+  } else {
+    predictors_in = paste(predictors_in, predictor[i],sep="+")
+  }
+  m2 <- glm(paste("high_use ~ ", predictors_in, sep = ""), data = alc, family = "binomial")
+  
+  cv <- cv.glm(data = alc, cost = loss_func, glmfit = m2, K = 10)
+  errs[i] <- cv$delta[1]
+}
+plot(x, errs, type='b', xlim = range(x))
+errs
+```
