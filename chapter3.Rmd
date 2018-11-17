@@ -13,7 +13,7 @@ Basically, here are the main points what is done in the code:
 * Two data sets are read in and combined as one, since they contain answers from same students, by joining them based on variables: `school`,`sex`,`age`,`address`,`famsize`,`Pstatus`,`Medu`,`Fedu`,`Mjob`,`Fjob`,`reason`,`nursery`,`internet`
 * The columns not used in join are combined by taking rounded avarage of numerical values and by selecting the first value of not numeric values
 * `alc_use` variable was generated to indicate alcohol use (avarage of daily and weekly consumption)
-* `high_use` variables was generated to indicate high use of alcohol (true is `alc_use` is > 2)
+* `high_use` variables was generated to indicate high use of alcohol (true is `alc_use` > 2)
 
 The dataset (`alc.csv`) that the code created can be found from c
 
@@ -71,7 +71,7 @@ ggpairs(alc_min,
         lower = list(combo = wrap("facethist", bins = 20))) + ggtitle("Student traveltime, studytime,\nfreetime and goout relations by alcohol consumption")
 ```
 
-Looking at box and bar plots of each chosen variable by alcohol consumption
+Looking at the box and bar plots of each chosen variable divided by alcohol we can see that `traveltime` and `freetime` are quite identically distributed both in terms of high and low alcohol consumption. When looking at the high alcohol consumption with  `freetime` it seems that the hight alcohol consumption increases more when freetime increases, whereas low alcohol consumption increases less when freetime increases.
 
 ```{r echo=FALSE, fig.show='hold', out.width='25%'}
 hu_traveltime_box <- ggplot(alc_min, aes(x = high_use, y = traveltime, col = high_use))
@@ -86,6 +86,9 @@ hu_traveltime_box + geom_boxplot() + ylab("freetime") + ggtitle("Student freetim
 hu_traveltime_his <- ggplot(alc_min, aes(x=freetime, fill=high_use))
 hu_traveltime_his + geom_bar() + coord_flip() + ggtitle("Student freetime by alcohol consumption BAR")
 ```
+
+With `studytime` and `goout` the distributions differ more in terms of high and low alcohol consumption. When looking at the high alcohol consumption with  `studytime` it seems that the high alcohol consumption increases more when studytime decreases compared to low alcohol consumption. Also high alcohol consumption increases more when go out time with friends increases compared to low alcohol consumption.
+
 ```{r echo=FALSE, fig.show='hold', out.width='25%'}
 hu_traveltime_box <- ggplot(alc_min, aes(x = high_use, y = studytime, col = high_use))
 hu_traveltime_box + geom_boxplot() + ylab("studytime") + ggtitle("Student studytime by alcohol consumption BOX")
@@ -100,3 +103,4 @@ hu_traveltime_his <- ggplot(alc_min, aes(x=goout, fill=high_use))
 hu_traveltime_his + geom_bar() + coord_flip() + ggtitle("Student go out by alcohol consumption BAR")
 ```
 
+### Step 5 - Statistical exploration with logistic regression
