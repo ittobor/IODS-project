@@ -10,7 +10,8 @@
 ##
 ##Step 3. Read the data files to R.
 ##
-data_dir <- "C:/Users/ittobor/projects/iods/IODS-project/data"
+#data_dir <- "C:/Users/ittobor/projects/iods/IODS-project/data"
+data_dir <- "//Users/ittobor/studies/iods/IODS-project/data"
 path_mat <- paste(data_dir, "student-mat.csv", sep="/")
 path_por <- paste(data_dir, "student-por.csv", sep="/")
 stud_mat <- read.table(path_mat, sep = ";" , header=TRUE)
@@ -32,7 +33,7 @@ colnames(stud_por)
 library(dplyr)
 
 # common columns to use as identifiers
-  join_by <- c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet")
+join_by <- c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet")
 # suffix for each dataset's uncommon columns
 suff <- c(".mat",".por")
 

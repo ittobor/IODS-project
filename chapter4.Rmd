@@ -1,0 +1,119 @@
+# Week4 - Clustering and classification
+
+Also for this week I prepared myself by completing DataCamp exercise on "Clustering and classification".
+
+## Data Analysis
+
+### Step 1 - New markdown file
+
+Step one again was to create chapter4.Rmd to inject its content to the actual course diary as a child of subscipts in index.Rmd.
+
+```{r echo=FALSE, message=FALSE}
+library(ggplot2)
+library(GGally)
+library(dplyr)
+library(tidyr)
+library(MASS)
+library(corrplot)
+library(tidyverse)
+```
+
+### Step 2 - THe Boston dataset from MASS package
+
+```{r echo=FALSE, message=FALSE}
+data("Boston")
+```
+In this exercise we are using the Boston dataset from MASS packege for R. The dataset contains "Housing Values in Suburbs of Boston" according to the dataset description in [here](https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/Boston.html) where you can also find details about the dataset columns.
+
+Boston dataset is a class type of: `r class(Boston)`. The dimensions of the dataset are `r dim(Boston)[1]` observations (rows) with `r dim(Boston)[2]` variables (columns).  
+
+Structure of the dataset is listed below.
+```{r echo=FALSE, message=FALSE}
+str(Boston)
+```
+
+### Step 3 - Graphical overview and the varible summaries of the Boston dataset 
+
+First, with a summary, and together with the additional information available in  [here](https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/Boston.html), we can take a look at the different scales of each of the variables. There are different rates, ratios, proprotions, avarages, means, medians and dummy (boolen indicator) as values used for different variables.
+
+```{r echo=FALSE, message=FALSE}
+summary(Boston)
+```
+
+Second, we can look at the density plots of each variable. I was tempted to draw relationship conclusion already based on these diagrams, but as we can see from correlation matrix (coming up next) things are not so obvious.
+
+```{r echo=FALSE, message=FALSE}
+Boston %>%
+  keep(is.numeric) %>%                     # Keep only numeric columns
+  gather() %>%                             # Convert to key-value pairs
+  ggplot(aes(value)) +                     # Plot the values
+    facet_wrap(~ key, scales = "free") +   # In separate panels
+    geom_density()                         # as density
+```
+
+Third, with a type of correlation matrix we can observe the relationships between the variables. I used a `mixed` version of the `corrplot` which was introduced in the DataCamp exercises. From this one you can visually locate the varibles with positive (&rarr; 1) and negative (&rarr; -1) relations from the top triangle and check their coefficients from the lower triangle. We can observe that variable pair (`rad`, `tax`) have the highest (> 0.9) positive relationship. Also pairs (`indus`,`nox`), (`indus`,`tax`), (`nox`,`age`) and (`rm`,`mediv`) have high posivite relationship (> 0.7). On the high negative relationships (< -0.7) we can mention pairs (`indus`,`dis`), (`nox`,`dis`), (`age`,`dis`) and (`lstat`,`medv`). Also noteworthy is that variable `chas` does not seem to correlate positively or negatively with any other variable in the dataset.
+
+```{r echo=FALSE, message=FALSE}
+cor_matrix<-cor(Boston) %>% round(digits=3)
+corrplot.mixed(cor_matrix, tl.cex=0.7)
+```
+
+### Step 4 - Standardizing the Boston dataset
+
+After scaling the variable values are scaled to normal distribution with 0 mean (or very close) and variance 1. Meaning the amout of values are equally numbered on both sides of 0 mean. This can be observed from the density plots after the summary (compare to similar density plot above).
+```{r echo=FALSE, message=TRUE}
+boston_scaled <- scale(Boston)
+summary(boston_scaled)
+boston_scaled <- as.data.frame(boston_scaled)
+boston_scaled %>%
+  keep(is.numeric) %>%                     # Keep only numeric columns
+  gather() %>%                             # Convert to key-value pairs
+  ggplot(aes(value)) +                     # Plot the values
+    facet_wrap(~ key, scales = "free") +   # In separate panels
+    geom_density()                         # as density
+```
+
+Then the based on the quantiles of the scaled crime rate variable `crim` a categorical variable is created. Original variable `crim` is removed and the new created variable `crime` is added to the date set. Here is the stucture of the modified dataset.
+```{r echo=FALSE, message=TRUE}
+bins <- quantile(boston_scaled$crim)
+crime <- cut(boston_scaled$crim, breaks = bins, include.lowest = TRUE, label=c("low","med_low","med_high","high"))
+boston_scaled <- dplyr::select(boston_scaled, -crim)
+boston_scaled <- data.frame(boston_scaled, crime)
+str(boston_scaled)
+```
+
+Dataset is split into two, so that 80% of the data is in train set and 20% in the test set.
+
+```{r echo=FALSE, message=TRUE}
+n <- nrow(boston_scaled)
+ind <- sample(n,  size = n * 0.8)
+train <- boston_scaled[ind,]
+test <- boston_scaled[-ind,]
+dim(train)
+dim(test)
+```
+
+### Step 5 - Fitting the LDA
+
+Here the LDA model is fitted with the train set. The model summary is printed. We can see that LD1 covers more than 0.95 of the group variance. Next the LDA is plotted as biplot. I used just 1 discriminant. There is something going on with the arrows, they don't work on the same scale as in the DataCamp. In order to even get some of the arrows visible I needed scale way more. (the number of discriminants did not have any effect on this property)
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+lda.fit <- lda(crime ~ ., data = train)
+lda.fit
+
+lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0.75, choices = c(1,2)){
+  heads <- coef(x)
+  arrows(x0 = 0, y0 = 0, 
+         x1 = myscale * heads[,choices[1]], 
+         y1 = myscale * heads[,choices[2]], col=color, length = arrow_heads)
+  text(myscale * heads[,choices], labels = row.names(heads), 
+       cex = tex, col=color, pos=3)
+}
+classes <- as.numeric(train$crime)
+plot(classes, dimen = 1, col=classes, pch=classes)
+lda.arrows(lda.fit, myscale = 16)
+```
+
+### Step 6 - Predicting with the LDA
+
+## Data Wrangling
