@@ -163,4 +163,24 @@ pairs(bs2, col = km$cluster)
 
 ```
 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#bs3 <- scale(Boston)
+#bs3 <- as.data.frame(bs3)
+#summary(bs3)
+
+#km <- kmeans(bs3, centers = 3)
+#pairs(bs3, col = km$cluster)
+
+#lda.fit <- lda(km$cluster ~ ., data = train)
+#lda.fit
+
+```
+
 ## Data Wrangling
+
+In this part it was needed to read two datasets from the internet. Then rename the column names in both datasets, create 2 new variables and the combine the data in to one dataset and store it.  
+
+The code for the date can be found from [here](https://github.com/ittobor/IODS-project/blob/master/data/create_human.R)  
+And the data can be found from [here](https://github.com/ittobor/IODS-project/blob/master/data/human.csv)
+
