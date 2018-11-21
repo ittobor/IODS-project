@@ -163,23 +163,54 @@ pairs(bs2, col = km$cluster)
 
 ```
 
+### Step Bonus - Finding classes to train LDA with K-means
+
+I found the instructions for this bonus exercise a little ambiguous, so I took some freedom since it is not clearly stated how some of the things should be done.  
+
+So, first I took the Boston dataset and scaled it. Did nothing to `crim`, no categorization.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-#bs3 <- scale(Boston)
-#bs3 <- as.data.frame(bs3)
-#summary(bs3)
-
-#km <- kmeans(bs3, centers = 3)
-#pairs(bs3, col = km$cluster)
-
-#lda.fit <- lda(km$cluster ~ ., data = train)
-#lda.fit
-
+bs3 <- scale(Boston)
+bs3 <- as.data.frame(bs3)
+summary(bs3)
 ```
+
+Then I ran k-means on the scaled data with 3 clusters specified. Showing the pairs plot. Took the cluster vector from results and added that as new column to origal scaled data.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+km <- kmeans(bs3, centers = 3)
+pairs(bs3, col = km$cluster)
+cluster <- km$cluster
+bs3 <- data.frame(bs3, cluster)
+str(bs3)
+```
+
+I did the same split into train and test dataset, as we did here earlier, so that I can see how well is the model predicting. Most influencial linear separators being `medv` and `chas`.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+n <- nrow(bs3)
+ind <- sample(n,  size = n * 0.8)
+train <- bs3[ind,]
+test <- bs3[-ind,]
+
+lda.fit <- lda(cluster ~ ., data = train)
+lda.fit
+classes <- as.numeric(train$cluster)
+plot(classes, dimen = 2, col=classes, pch=classes)
+lda.arrows(lda.fit, myscale = 3)
+
+correct_classes <- test[,'cluster']
+test <- dplyr::select(test, -cluster)
+lda.pred <- predict(lda.fit, newdata = test)
+table(correct = correct_classes, predicted = lda.pred$class)
+```
+
+And we can see that the precidtion is quite precise. But what these 3 classes should represent with this data (when above we were predicting crime).
+
 
 ## Data Wrangling
 
-In this part it was needed to read two datasets from the internet. Then rename the column names in both datasets, create 2 new variables and the combine the data in to one dataset and store it.  
+In this part it was needed to read two datasets from the internet. Then rename the column names in both datasets, create 2 new variables and the combine the data in to one dataset and store it. I had some problems when reading the stored data, I did not get the same amount of observations that was in the file (I got 164 instead of 195 in the file). Did not see really anything wrong in the file, but I turned quotes to it default value (TRUE) when saving the data, and after that the data with correct amount of observations could be read.
 
 The code for the date can be found from [here](https://github.com/ittobor/IODS-project/blob/master/data/create_human.R)  
 And the data can be found from [here](https://github.com/ittobor/IODS-project/blob/master/data/human.csv)
