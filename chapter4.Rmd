@@ -116,4 +116,29 @@ lda.arrows(lda.fit, myscale = 16)
 
 ### Step 6 - Predicting with the LDA
 
+The LDA model fitted in previous step is used to predict the crime class for test data after real test values are removed from the data. Then the predicted class results are compared against the known true values in the table below. We can see that on the test data the predicted values for class `high` are almost perfect. Class `med_high` seems to have the worst prediction precision since almost half of the values are predicted to other classes. Class `med_low` gets almost similarly bad result where 2/3 of the values are predicted to wrong classes. Class `low` has the second best prediction precision but for that almost 1/3 get predicted to wrong class.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+correct_classes <- test[,'crime']
+test <- dplyr::select(test, -crime)
+lda.pred <- predict(lda.fit, newdata = test)
+table(correct = correct_classes, predicted = lda.pred$class)
+```
+
+### Step 7 - Clustering with K-means
+
+First Boston dataset is reloaded and scaled.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+bs2 <- as.data.frame(scale(Boston))
+str(bs2)
+```
+
+Then the euclidian distances between the scaled observations is computed.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+bs2_dist_eu <- dist(bs2)
+summary(bs2_dist_eu)
+```
+
+
 ## Data Wrangling
