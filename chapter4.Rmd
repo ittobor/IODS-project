@@ -127,7 +127,7 @@ table(correct = correct_classes, predicted = lda.pred$class)
 
 ### Step 7 - Clustering with K-means
 
-First Boston dataset is reloaded and scaled.
+First Boston dataset is reloaded and scaled again.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 bs2 <- as.data.frame(scale(Boston))
@@ -140,5 +140,27 @@ bs2_dist_eu <- dist(bs2)
 summary(bs2_dist_eu)
 ```
 
+Simple initial run of K-means algorithm with randomly chosen number of cluster centers (5). The pairs plot is hard to read when all variables are compared with each other. Splitting the data for pairs plot makes it more readable but you will then miss the comparson between all variables.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+km <- kmeans(bs2, centers = 5)
+pairs(bs2, col = km$cluster)
+```
+
+To determine the optimal number of clusters total WCSS (within cluster sum of squares) can be used for help. Here I use 14 as the maximum cluster, just based on the number of variables in the dataset, and quick plot the tWCSS results. The optimal number of clusters is when the tWCSS drops dramatically, and here we get the same result (2 clusters) as in the Data Camp exercise.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+set.seed(666)
+k_max = 14
+twcss <- sapply(1:k_max, function(k){kmeans(bs2, k)$tot.withinss})
+qplot(x = 1:k_max, y = twcss, geom = 'line')
+```
+Running the K-means algorithm again but now with 2 cluster as per optimal suggestion. Plotting the results with pairs to see all variables compared and split to two clusters.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+km <- kmeans(bs2, centers = 2)
+pairs(bs2, col = km$cluster)
+
+```
 
 ## Data Wrangling
