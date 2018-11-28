@@ -95,7 +95,9 @@ dim(test)
 
 ### Step 5 - Fitting the LDA
 
-Here the LDA model is fitted with the train set. The model summary is printed. We can see that LD1 covers more than 0.95 of the group variance. Next the LDA is plotted as biplot. I used just 1 discriminant. There is something going on with the arrows, they don't work on the same scale as in the DataCamp. In order to even get some of the arrows visible I needed scale way more. (the number of discriminants did not have any effect on this property)
+Here the LDA model is fitted with the train set. The model summary is printed. We can see that LD1 covers more than 0.95 of the group variance. Next the LDA is plotted as biplot. I used just 1 discriminant. There is something going on with the arrows, they don't work on the same scale as in the DataCamp. In order to even get some of the arrows visible I needed scale way more. (the number of discriminants did not have any effect on this property).  
+
+!!Tue 27th!! Found the issue, not the arrows but wrong data to plot :(
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 lda.fit <- lda(crime ~ ., data = train)
@@ -110,8 +112,10 @@ lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0
        cex = tex, col=color, pos=3)
 }
 classes <- as.numeric(train$crime)
-plot(classes, dimen = 1, col=classes, pch=classes)
-lda.arrows(lda.fit, myscale = 16)
+
+# fixed this
+plot(lda.fit, dimen = 2, col=classes, pch=classes)
+lda.arrows(lda.fit, myscale = 3)
 ```
 
 ### Step 6 - Predicting with the LDA

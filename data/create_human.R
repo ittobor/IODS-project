@@ -60,3 +60,6 @@ write.table(human, file=out_data_path, row.names = FALSE, sep = ";")
 # checking that the dimesions match
 human_check <- read.table(out_data_path, sep = ";" , header=TRUE)
 dim(human_check)
+
+
+### Week5 ###
