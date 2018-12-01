@@ -1,4 +1,4 @@
-# Week4 - Dimensionality reduction techniques
+# Week5 - Dimensionality reduction techniques
 
 This week we took a look at dimensionality reduction methods namely principal component ananlysis (PCA) and multiple correspondence analysis (MCA).  
 
@@ -150,5 +150,4 @@ res.mca = FactoMineR::MCA(tea, quanti.sup=19, quali.sup=c(20:36), graph=FALSE)
 plot.MCA(res.mca, invisible=c("var","quali.sup","quanti.sup"), cex=0.7)
 plot.MCA(res.mca, invisible=c("ind","quali.sup","quanti.sup"), cex=0.7)
 plot.MCA(res.mca, invisible=c("ind","var"), cex=0.7)
-
 ```

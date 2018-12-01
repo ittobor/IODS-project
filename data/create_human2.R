@@ -60,10 +60,15 @@ str(human)
 ## Save file as human2.csv
 ##
 #
-rownames(human) <- human$Country
+b <- as.character(human$Country)
+b[142] <- "Cote dIvory"
+rownames(human) <- b
 human <- dplyr::select(human, -Country)
 head(human, n=10)
 str(human)
 out_data_name <- "human2.csv"
 out_data_path <- paste(data_dir, out_data_name, sep="/")
-write.table(human, file=out_data_path, row.names = TRUE, quote = FALSE, sep = ";")
+write.table(human, file=out_data_path, row.names = TRUE, quote = TRUE, sep = ";")
+chuman <- read.table(out_data_path, sep = ";", header=TRUE)
+str(chuman)
+
