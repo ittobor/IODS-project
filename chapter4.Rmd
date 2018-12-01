@@ -112,8 +112,7 @@ lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0
        cex = tex, col=color, pos=3)
 }
 classes <- as.numeric(train$crime)
-
-# fixed this
+# fixed this part
 plot(lda.fit, dimen = 2, col=classes, pch=classes)
 lda.arrows(lda.fit, myscale = 3)
 ```

@@ -1,0 +1,154 @@
+# Week4 - Dimensionality reduction techniques
+
+This week we took a look at dimensionality reduction methods namely principal component ananlysis (PCA) and multiple correspondence analysis (MCA).  
+
+There was the usual Data Camp exercise as on introduction to dimensionality reduction techniques.  
+
+Rest of the exercises are presented in this chapter of the diary.
+
+## Data Wrangling
+
+In the data wrangling part we used the combined dataset from last weeks exercise and did some further manipulations to it.  
+
+The script for the data mutilation is [here](https://github.com/ittobor/IODS-project/blob/master/data/create_human2.R).  
+
+And the resultind data is [here](https://github.com/ittobor/IODS-project/blob/master/data/human2.csv).  
+
+## Data Analysis
+
+### Step 1 - Summary and graphical overview of the data
+
+As I had stored previously my data file as *.csv* I noticed that when reading the file with `read.csv2` numeric (n.i. integers) are interpreted as Factorials. With that one needs to convert those string back to numeric form. Or other way around it is to use `read.table` and then such variables are "automagically" interpreted as numerics.  
+
+First I just `read.table` and show the structure of the file.
+
+```{r echo=FALSE, message=FALSE}
+library(stringr)
+human <- read.table("https://raw.githubusercontent.com/ittobor/IODS-project/master/data/human2.csv", sep=";", header=TRUE)
+str(human)
+```
+
+Next I visualize the data with `ggpairs` and `corrplot.mixed`. From the `ggpairs` plot we can observe the density of each variable. In this plot there are the correlation coefficients on upper part, but it is a little difficult to read. Then the scatter plots in the lower part show the pairwise correlation.
+
+```{r echo=FALSE, message=FALSE}
+library(ggplot2)
+library(GGally)
+ggpairs(human, 
+        mapping = aes(alpha = 0.3), 
+        lower = list(combo = wrap("facethist", bins = 20)))
+```
+
+The `corrplot.mixed` shows nicely the pairwise correlation of each variable. The two most similar variable pairs are (`Edu.Exp`,`Life.Exp`) and (`Mat.Mor`,`Ado.Birth`). And the two most dissimilar variable pairs are (`Life.Exp`,`Mat.Mor`) and (`Mat.Mor`,`Edu.Exp`).
+
+```{r echo=FALSE, message=FALSE}
+library(corrplot)
+cor(human) %>% corrplot.mixed(tl.cex=0.7)
+```
+
+From the summary we can see that there is some difference in the scale of the value when comparing the variables. We can also observe the variance of each variables values.
+
+```{r echo=FALSE, message=FALSE}
+summary(as.matrix(human))
+```
+
+### Step 2 - Principal Component Analysis on non-standardized data
+
+First the PCA is performed with non-stardardized `human` data (summary of non-standarized data above). The table below is the summary of the performed PCA, showing that the first principal component (PC1) captures almost all, ~99.99%, of the variance in the non-stardardized data.  
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pca_human <- prcomp(human)
+summary(pca_human)
+biplot(pca_human, choices = 1:2, cex=c(0.8,1), col=c("blue","red"))
+```
+
+### Step 3 - Principal Component Analysis on standardized data
+
+Next the PCA is performed with stardardized `human` data (summary of standarized data below).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+human_std <- scale(human)[,]
+summary(human_std)
+```
+
+The summary of the PCA performed on standardized data is shown in table below. The first principal component (PC1) captures roughly 53% and the second principle component (PC2) roughly 16% of the variance in the data, making it almost 70% of the variance capture by the first two principal components. The results between the PCA on non-standardized and standardized data differs a lot because PCA method assumes that variables with larger variance are more important and hence the method is sensitive to the relative scaling of the original variables.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pca_human_std <- prcomp(human_std)
+summary(pca_human_std)
+```
+From the biplot below we can see which variables are correlating with each other and with which PC. Group 1, with `Abo.Birth` and `Mat.Mor`, are pointing to the same direction and have a small angle between them, meaning they have strong positive correlattion. Group 2, with `Parli.F` and `Labo.FM`, are pointing to the same direction, meaning they have a strong positive correlation. Group 3, with `GNI`, `Edu.Exp`, `Life.Exp` and `Edu2.FM`, are pointing to the same direction and have a small angles between each other, meaning they have a strong positive correlation. Group 2 is almost orthogonal to both Group 1 and Group3 meaning Group 2 variables do not correlate/effect the variables of two other groups. Group 1 and Group 2 are pointing to opposite directions meaning the Group 1 and have negative correlation between the variables in those groups. Also, Group 1 variables is almost parallel with the second principal component and Groups 1 and 3 with the first principal component, meaning the groups have high positive correlation to those PC's respectively.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+biplot(pca_human_std, choices = 1:2, cex=c(0.8,1), col=c("blue","red"), scale=0)
+```
+
+
+### Step 4 - Personal interpretation of the PCA on `human` data
+
+My initial interpretation/understanding about PCA follows from the course material. It is a dimension reduction method for high dimensional data. It captures the most important dimensions (variables) from high-dimensional dataset as new (principal) components. Each PC is linear combination of the original dimensions that captures the variance in dataset, the first PC capturing the most of the variance (information), the consecutive PC's capture the most variance left and is uncorrelated to the previous component. The biplot above and the table below explain the orignal values contributing each of the two principal component: PC1 is contributed by the variables in Group 1 and in Group3, PC2 if contributed by the variables in Group 2.  
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pca_human_std$rotation
+```
+
+### Step 5 - Why MCA on tea data?
+
+(Sorry, couldn't resist a joke on YMCA.)  
+
+#### 1st try
+
+By loading the `tea` dataset from FactoMineR package and by observing it can be seen that the dataset holds 300 observations with 36 variables. 35 variables are factorials and only one variable (`age`) is numerical. Age is also represented as categorical variable `age_Q` in the dataset.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(FactoMineR)
+data(tea)
+dim(tea)
+str(tea)
+```
+
+Removed variable `age` from the dataset and used rest of the variables for visualization below.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyr)
+library(dplyr)
+tea_sup <- dplyr::select(tea, -age)
+dim(tea_sup)
+gather(tea_sup[,1:6]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() +theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+gather(tea_sup[,7:12]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() +theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+gather(tea_sup[,13:18]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() +theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+gather(tea_sup[,19:24]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() +theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+gather(tea_sup[,25:30]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() +theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+gather(tea_sup[,31:35]) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() +theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+```
+
+For the MCA I will consider only the variables with binary values. Only for the reason that when running the MCA with all variables the dimensions seems not to be 1:1 with variables &rarr; each exrta value is its own dimension resulting in 54 dimension if all variables are included. I have no other criteria on what to choose or not to choose as variables, just thinking is it more simple just with binary valued variables.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+keep_columns <- c("always", "breakfast", "dinner", "evening", "lunch", "tea.time", "friends", "home", "pub", "resto", "tearoom", "work", "sugar", "escape.exoticism", "sex", "Sport", "diuretic", "feminine", "friendliness", "healthy", "iron.absorption", "spirituality", "effect.on.health", "exciting", "relaxing", "slimming", "sophisticated")
+tea_sup <- dplyr::select(tea_sup, one_of(keep_columns))
+mca <- FactoMineR::MCA(tea_sup, graph = FALSE)
+summary(mca)
+```
+
+Selecting many variables (this has 27) makes the MCA plot less readable. It can be observed that many variables are close, but then again which?
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+plot(mca, invisible=c("ind"), cex=c(0.7), habillage="quali")
+```
+
+#### 2nd try
+
+Here I use the original dataset again, this time using the parameters of the MCA call to denote the different types of variables. Variables 1-18 is denoted as active, 19 (`age`) as supplemetentery continuous variable and variables 20-36 are as supplementery categorical. Then I use plot.MCA to output several plots for the performed MCA.  
+
+In the first plot there are the individuals and we can see there are not groupings here.  
+
+Second is the active (in MCA) categorical variables. Hard to make judgements here.
+
+Third is the supplementary variables which did not contribute in the MCA.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+res.mca = FactoMineR::MCA(tea, quanti.sup=19, quali.sup=c(20:36), graph=FALSE)
+plot.MCA(res.mca, invisible=c("var","quali.sup","quanti.sup"), cex=0.7)
+plot.MCA(res.mca, invisible=c("ind","quali.sup","quanti.sup"), cex=0.7)
+plot.MCA(res.mca, invisible=c("ind","var"), cex=0.7)
+
+```

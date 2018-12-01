@@ -66,4 +66,4 @@ head(human, n=10)
 str(human)
 out_data_name <- "human2.csv"
 out_data_path <- paste(data_dir, out_data_name, sep="/")
-write.table(human, file=out_data_path, row.names = TRUE, sep = ";")
+write.table(human, file=out_data_path, row.names = TRUE, quote = FALSE, sep = ";")
